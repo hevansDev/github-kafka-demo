@@ -1,1 +1,0 @@
-{"rule":"ENGLISH_WORD_REPEAT_BEGINNING_RULE","sentence":"^\\QCreate two new cron jobs to run both of the producers once an hour (or more frequently if you prefer).\\E$"}
