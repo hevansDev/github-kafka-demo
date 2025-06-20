@@ -22,3 +22,13 @@ docker compose up -d
 
 [View Clickhouse](http://localhost:8123/play)
 
+--- Scratch notes
+
+https://github.com/emanuelef/daily-stars-explorer
+
+isntead of original data source for whole period?
+
+Manually enrich with PRs
+
+https://emanuelef.github.io/daily-stars-explorer/#/apache/kafka
+

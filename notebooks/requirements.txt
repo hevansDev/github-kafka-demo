@@ -6,3 +6,4 @@ ipython
 jupyter
 jupysql
 clickhouse_sqlalchemy
+dotenv
