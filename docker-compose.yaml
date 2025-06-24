@@ -18,7 +18,7 @@ services:
       # Map listener names to security protocols (no auth)
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       # Define what addresses to advertise to clients
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker:29092,EXTERNAL://kafka.hughevans.dev:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker:29092,EXTERNAL://localhost:9092
       # Basic Kafka configs
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0

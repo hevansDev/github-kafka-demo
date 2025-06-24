@@ -7,3 +7,4 @@ jupyter
 jupysql
 clickhouse_sqlalchemy
 dotenv
+confluent-kafka
