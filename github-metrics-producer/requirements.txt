@@ -1,0 +1,10 @@
+clickhouse_connect
+pandas
+tabulate
+pygments
+ipython
+jupyter
+jupysql
+clickhouse_sqlalchemy
+dotenv
+confluent-kafka
