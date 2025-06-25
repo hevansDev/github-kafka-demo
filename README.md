@@ -22,13 +22,10 @@ docker compose up -d
 
 [View Clickhouse](http://localhost:8123/play)
 
---- Scratch notes
+## Historic Data
 
-https://github.com/emanuelef/daily-stars-explorer
+- 2011-2025 [GitHub Data Set from Kaggle](https://www.kaggle.com/datasets/github/github-repos) with the following [BigQuery query](./data/big-query.sql)
+- 2025-now Stars data export from [Daily Stars explorer](https://emanuelef.github.io/daily-stars-explorer/#/apache/kafka) and [enriched with GitHub API data](./data/2025-today-kafka.csv)
 
-isntead of original data source for whole period?
 
-Manually enrich with PRs
-
-https://emanuelef.github.io/daily-stars-explorer/#/apache/kafka
 
