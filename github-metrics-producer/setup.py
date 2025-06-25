@@ -13,8 +13,8 @@ load_dotenv()
 
 # ===== CONFIGURATION =====
 GRANULARITY_CONFIG = {
-    'interval_minutes': 1,  # How often to collect data (60 = hourly, 30 = every 30 min, etc.)
-    'lookback_hours': 0.0166,     # How far back to look for new activity
+    'interval_minutes': 60,  # How often to collect data (60 = hourly, 30 = every 30 min, etc.)
+    'lookback_hours': 1,     # How far back to look for new activity
     'table_prefix': 'prod'   # Prefix for table names
 }
 
@@ -67,7 +67,7 @@ def ingest_historic_data(tables):
     print("Ingesting historic data...")
     
     # Ingest 2011-2015 data
-    os.system(f'clickhouse-client --password ClickHousePassword --query "INSERT INTO {tables["main"]} FORMAT CSV" < ../data/2011-2015-kafka.csv')
+    os.system('tail -n +2 ../data/2011-2015-kafka.csv | clickhouse-client --password ClickHousePassword --query "INSERT INTO prod_github_data (repo, date, stars_gained_that_period, prs_opened_that_period, cumulative_stars, cumulative_prs) SELECT repo, toDate(date), stars_gained_that_period, prs_opened_that_period, cumulative_stars, cumulative_prs FROM input(\'repo String, date String, stars_gained_that_period UInt32, prs_opened_that_period UInt32, cumulative_stars UInt32, cumulative_prs UInt32\') FORMAT CSV"')
     
     # Process recent data with PR enrichment
     GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "null")
@@ -102,8 +102,7 @@ def ingest_historic_data(tables):
     
     # Save and ingest
     df.to_csv('../data/2025-today-kafka.csv', index=False)
-    os.system(f'tail -n +2 ../data/2025-today-kafka.csv | clickhouse-client --password ClickHousePassword --query "INSERT INTO {tables["main"]} FORMAT CSV"')
-    
+    os.system('tail -n +2 ../data/2025-today-kafka.csv | clickhouse-client --password ClickHousePassword --query "INSERT INTO prod_github_data (repo, date, stars_gained_that_period, prs_opened_that_period, cumulative_stars, cumulative_prs) SELECT repo, toDate(date), stars_gained_that_period, prs_opened_that_period, cumulative_stars, cumulative_prs FROM input(\'repo String, date String, stars_gained_that_period UInt32, prs_opened_that_period UInt32, cumulative_stars UInt32, cumulative_prs UInt32\') FORMAT CSV"')
     print("Done")
 
 def get_prs_by_date(repo, start_date, end_date, token=None):

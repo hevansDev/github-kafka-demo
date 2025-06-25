@@ -70,14 +70,3 @@ services:
       - 3000:3000
     restart: on-failure
     user: root
-  
-  # githubeventsproducer:
-  #   build:
-  #     context: ./githubeventsproducer/.
-  #     dockerfile: Dockerfile
-  #   container_name: githubeventsproducer
-  #   depends_on:
-  #     - kafka-broker
-  #   volumes:
-  #     - ./githubeventsproducer:/opt/app
-  #   working_dir: /opt/app

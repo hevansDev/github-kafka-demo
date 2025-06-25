@@ -1,4 +1,4 @@
-repo,date,stars_gained_that_day,prs_opened_that_day,cumulative_stars,cumulative_prs
+repo,date,stars_gained_that_period,prs_opened_that_period,cumulative_stars,cumulative_prs
 apache/kafka,2025-01-01,5,0,28968,17239
 apache/kafka,2025-01-02,12,5,28980,17244
 apache/kafka,2025-01-03,3,5,28983,17249
