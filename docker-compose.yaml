@@ -1,118 +1,59 @@
-name: githubevents
+name: github-kafka-demo
 
 volumes:
-  metadata_data: {}
-  middle_var: {}
-  historical_var: {}
-  broker_var: {}
-  coordinator_var: {}
-  router_var: {}
-  druid_shared: {}
+  clickhouse_data: {}
+  clickhouse_logs: {}
   grafana_storage: {}
 
 
 services:
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    volumes:
-      - metadata_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=FoolishPassword
-      - POSTGRES_USER=druid
-      - POSTGRES_DB=druid
-
-  # Need 3.5 or later for container nodes
-  zookeeper:
-    image: zookeeper:latest
-    container_name: zookeeper
-    environment:
-      - ZOO_MY_ID=1
-      - ALLOW_ANONYMOUS_LOGIN=yes
-
-  coordinator:
-    image: imply/druid:${DRUID_VERSION:-31.0.0}
-    container_name: coordinator
-    volumes:
-      - druid_shared:/opt/shared
-      - coordinator_var:/opt/druid/var
-    depends_on:
-      - zookeeper
-      - postgres
-    ports:
-      - "8081:8081"
-    command:
-      - coordinator
-    env_file:
-      - environment
-
   broker:
-    image: imply/druid:${DRUID_VERSION:-31.0.0}
+    image: apache/kafka:latest
+    hostname: broker
     container_name: broker
-    volumes:
-      - broker_var:/opt/druid/var
-      - druid_shared:/opt/shared
-    depends_on:
-      - zookeeper
-      - postgres
-      - coordinator
     ports:
-      - "8082:8082"
-    command:
-      - broker
-    env_file:
-      - environment
+      - 9092:9092     # Expose external port
+    environment:
+      KAFKA_BROKER_ID: 1
+      # Map listener names to security protocols (no auth)
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      # Define what addresses to advertise to clients
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker:29092,EXTERNAL://localhost:9092
+      # Basic Kafka configs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      # KRaft mode settings
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      # Define interfaces and ports to listen on
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://broker:29093
+      # Internal communication between brokers (if you had multiple)
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
 
-  historical:
-    image: imply/druid:${DRUID_VERSION:-31.0.0}
-    container_name: historical
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:25.4
+    container_name: clickhouse-server
     volumes:
-      - druid_shared:/opt/shared
-      - historical_var:/opt/druid/var
-    depends_on:
-      - zookeeper
-      - postgres
-      - coordinator
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
     ports:
-      - "8083:8083"
-    command:
-      - historical
-    env_file:
-      - environment
-
-  middlemanager:
-    image: imply/druid:${DRUID_VERSION:-31.0.0}
-    container_name: middlemanager
-    volumes:
-      - druid_shared:/opt/shared
-      - middle_var:/opt/druid/var
-    depends_on:
-      - zookeeper
-      - postgres
-      - coordinator
-    ports:
-      - "8091:8091"
-      - "8100-8105:8100-8105"
-    command:
-      - middleManager
-    env_file:
-      - environment
-
-  router:
-    image: imply/druid:${DRUID_VERSION:-31.0.0}
-    container_name: router
-    volumes:
-      - router_var:/opt/druid/var
-    depends_on:
-      - zookeeper
-      - postgres
-      - coordinator
-    ports:
-      - "8888:8888"
-    command:
-      - router
-    env_file:
-      - environment
+      - "8123:8123"   # HTTP interface
+      - "9000:9000"   # Native TCP interface
+      - "9009:9009"   # Interserver communication port
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    environment:
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=ClickHousePassword
+      - CLICKHOUSE_DB=default
   
   grafana:
     depends_on:
@@ -129,14 +70,3 @@ services:
       - 3000:3000
     restart: on-failure
     user: root
-  
-  # githubeventsproducer:
-  #   build:
-  #     context: ./githubeventsproducer/.
-  #     dockerfile: Dockerfile
-  #   container_name: githubeventsproducer
-  #   depends_on:
-  #     - kafka-broker
-  #   volumes:
-  #     - ./githubeventsproducer:/opt/app
-  #   working_dir: /opt/app
